@@ -3,6 +3,7 @@
 This folders includes all the files we made or use for the project completion.
 
 Date: 26/01/2020
+
 Authors: Mikele Zurutuza, Ivan Valdes, Alex Tesouro and Xabier Etxezarreta.
 
 ## Machine Learning Data Analysis files *(/popbl_data_analysis)*
