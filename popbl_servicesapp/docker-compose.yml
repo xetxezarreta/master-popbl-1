@@ -1,0 +1,290 @@
+version: '3.1'
+services:
+  # Service RabbitMQ
+  rabbitmq:
+    image: "rabbitmq:3.8.1-management-alpine"
+    hostname: rabbitmq
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS}"
+      RABBITMQ_DEFAULT_VHOST: "/"
+      RABBITMQ_SSL_CERTFILE: "${RABBITMQ_SERVER_CERT}"
+      RABBITMQ_SSL_KEYFILE: "${RABBITMQ_SERVER_KEY}"
+      RABBITMQ_SSL_CACERTFILE: "${RABBITMQ_CA_CERT}"
+      RABBITMQ_MANAGEMENT_SSL_CERTFILE: "${RABBITMQ_SERVER_CERT}"
+      RABBITMQ_MANAGEMENT_SSL_KEYFILE: "${RABBITMQ_SERVER_KEY}"
+      RABBITMQ_MANAGEMENT_SSL_CACERTFILE: "${RABBITMQ_CA_CERT}"
+      HOST_IP: "${HOST_IP}"
+    volumes:
+      - './cert_rabbitmq:/cert_rabbitmq'
+    networks:
+      pbl_network:
+        ipv4_address: '${RABBITMQ_IP}'
+    expose:
+      - '${RABBITMQ_PORT}'
+      - "15671"
+    ports:
+      - "15671:15671"
+      - '${RABBITMQ_PORT}:${RABBITMQ_PORT}'
+    restart: unless-stopped
+
+  # Service AUTH
+  auth:
+    build: ./flask_app
+    hostname: auth
+    container_name: auth
+    ports:
+      - '${AUTH_PORT}:${GUNICORN_PORT}'
+    volumes:
+      - './flask_app/auth:/app'
+      - './cert_rabbitmq:/cert_rabbitmq'
+    expose:
+      - '${GUNICORN_PORT}'
+    environment:
+      - 'SERVICE_NAME=auth'
+      - 'SERVICE_ID=auth1'
+      - 'CONSUL_HOST=${CONSUL_HOST}'
+      - 'GUNICORN_PORT=${GUNICORN_PORT}'
+      - 'SQLALCHEMY_DATABASE_URI=${SQLALCHEMY_AUTH_DATABASE_URI}'
+      - 'RABBITMQ_IP=${RABBITMQ_IP}'
+      - 'RABBITMQ_PORT=${RABBITMQ_PORT}'
+      - 'RABBITMQ_USER=${RABBITMQ_USER}'
+      - 'RABBITMQ_PASS=${RABBITMQ_PASS}'
+      - 'RABBITMQ_CLIENT_CERT=${RABBITMQ_CLIENT_CERT}'
+      - 'RABBITMQ_CLIENT_KEY=${RABBITMQ_CLIENT_KEY}'
+      - 'RABBITMQ_CA_CERT=${RABBITMQ_CA_CERT}'
+      - 'HOST_IP=${HOST_IP}'
+      - 'PYTHONUNBUFFERED= 1'
+    networks:
+      pbl_network:
+        ipv4_address: '${AUTH_IP}'
+    restart: unless-stopped
+
+  # Service Delivery
+  delivery:
+    build: ./flask_app
+    hostname: delivery
+    container_name: delivery
+    ports:
+      - '${DELIVERY_PORT}:${GUNICORN_PORT}'
+    volumes:
+      - './flask_app/delivery:/app'
+      - './cert_rabbitmq:/cert_rabbitmq'
+    expose:
+      - '${GUNICORN_PORT}'
+    environment:
+      - 'SERVICE_NAME=delivery'
+      - 'SERVICE_ID=delivery'
+      - 'CONSUL_HOST=${CONSUL_HOST}'
+      - 'HAPROXY_PORT=${HAPROXY_PORT}'
+      - 'HAPROXY_IP=${HAPROXY_IP}'
+      - 'GUNICORN_PORT=${GUNICORN_PORT}'
+      - 'SQLALCHEMY_DATABASE_URI=${SQLALCHEMY_DELIVERY_DATABASE_URI}'
+      - 'RABBITMQ_IP=${RABBITMQ_IP}'
+      - 'RABBITMQ_PORT=${RABBITMQ_PORT}'
+      - 'RABBITMQ_USER=${RABBITMQ_USER}'
+      - 'RABBITMQ_PASS=${RABBITMQ_PASS}'
+      - 'RABBITMQ_CLIENT_CERT=${RABBITMQ_CLIENT_CERT}'
+      - 'RABBITMQ_CLIENT_KEY=${RABBITMQ_CLIENT_KEY}'
+      - 'RABBITMQ_CA_CERT=${RABBITMQ_CA_CERT}'
+      - 'HOST_IP=${HOST_IP}'
+      - 'PYTHONUNBUFFERED= 1'
+    networks:
+      pbl_network:
+        ipv4_address: '${DELIVERY_IP}'
+    restart: unless-stopped
+
+  # Service Machine
+  machine:
+    build: ./flask_app
+    hostname: machine
+    container_name: machine
+    ports:
+      - '${MACHINE_PORT}:${GUNICORN_PORT}'
+    volumes:
+      - './flask_app/machine:/app'
+      - './cert_rabbitmq:/cert_rabbitmq'
+    expose:
+      - '${GUNICORN_PORT}'
+    environment:
+      - 'SERVICE_NAME=machine'
+      - 'SERVICE_ID=machine1'
+      - 'CONSUL_HOST=${CONSUL_HOST}'
+      - 'HAPROXY_PORT=${HAPROXY_PORT}'
+      - 'HAPROXY_IP=${HAPROXY_IP}'
+      - 'GUNICORN_PORT=${GUNICORN_PORT}'
+      - 'SQLALCHEMY_DATABASE_URI=${SQLALCHEMY_MACHINE_DATABASE_URI}'
+      - 'RABBITMQ_IP=${RABBITMQ_IP}'
+      - 'RABBITMQ_PORT=${RABBITMQ_PORT}'
+      - 'RABBITMQ_USER=${RABBITMQ_USER}'
+      - 'RABBITMQ_PASS=${RABBITMQ_PASS}'
+      - 'RABBITMQ_CLIENT_CERT=${RABBITMQ_CLIENT_CERT}'
+      - 'RABBITMQ_CLIENT_KEY=${RABBITMQ_CLIENT_KEY}'
+      - 'RABBITMQ_CA_CERT=${RABBITMQ_CA_CERT}'
+      - 'HOST_IP=${HOST_IP}'
+      - 'PYTHONUNBUFFERED= 1'
+    networks:
+      pbl_network:
+        ipv4_address: '${MACHINE_IP}'
+    restart: unless-stopped
+
+  # Service Order
+  order:
+    build: ./flask_app
+    hostname: order
+    container_name: order
+    ports:
+      - '${ORDER_PORT}:${GUNICORN_PORT}'
+    volumes:
+      - './flask_app/order:/app'
+      - './cert_rabbitmq:/cert_rabbitmq'
+    expose:
+      - '${GUNICORN_PORT}'
+    environment:
+      - 'SERVICE_NAME=order'
+      - 'SERVICE_ID=order1'
+      - 'CONSUL_HOST=${CONSUL_HOST}'
+      - 'HAPROXY_PORT=${HAPROXY_PORT}'
+      - 'HAPROXY_IP=${HAPROXY_IP}'
+      - 'GUNICORN_PORT=${GUNICORN_PORT}'
+      - 'SQLALCHEMY_DATABASE_URI=${SQLALCHEMY_ORDER_DATABASE_URI}'
+      - 'RABBITMQ_IP=${RABBITMQ_IP}'
+      - 'RABBITMQ_PORT=${RABBITMQ_PORT}'
+      - 'RABBITMQ_USER=${RABBITMQ_USER}'
+      - 'RABBITMQ_PASS=${RABBITMQ_PASS}'
+      - 'RABBITMQ_CLIENT_CERT=${RABBITMQ_CLIENT_CERT}'
+      - 'RABBITMQ_CLIENT_KEY=${RABBITMQ_CLIENT_KEY}'
+      - 'RABBITMQ_CA_CERT=${RABBITMQ_CA_CERT}'
+      - 'HOST_IP=${HOST_IP}'
+      - 'PYTHONUNBUFFERED= 1'
+    networks:
+      pbl_network:
+        ipv4_address: '${ORDER_IP}'
+    restart: unless-stopped
+
+  # Service Payment
+  payment:
+    build: ./flask_app
+    hostname: payment
+    container_name: payment
+    container_name: payment
+    ports:
+      - '${PAYMENT_PORT}:${GUNICORN_PORT}'
+    volumes:
+      - './flask_app/payment:/app'
+      - './cert_rabbitmq:/cert_rabbitmq'
+    expose:
+      - '${GUNICORN_PORT}'
+    environment:
+      - 'SERVICE_NAME=payment'
+      - 'SERVICE_ID=payment1'
+      - 'CONSUL_HOST=${CONSUL_HOST}'
+      - 'HAPROXY_PORT=${HAPROXY_PORT}'
+      - 'HAPROXY_IP=${HAPROXY_IP}'
+      - 'GUNICORN_PORT=${GUNICORN_PORT}'
+      - 'SQLALCHEMY_DATABASE_URI=${SQLALCHEMY_PAYMENT_DATABASE_URI}'
+      - 'RABBITMQ_IP=${RABBITMQ_IP}'
+      - 'RABBITMQ_PORT=${RABBITMQ_PORT}'
+      - 'RABBITMQ_USER=${RABBITMQ_USER}'
+      - 'RABBITMQ_PASS=${RABBITMQ_PASS}'
+      - 'RABBITMQ_CLIENT_CERT=${RABBITMQ_CLIENT_CERT}'
+      - 'RABBITMQ_CLIENT_KEY=${RABBITMQ_CLIENT_KEY}'
+      - 'RABBITMQ_CA_CERT=${RABBITMQ_CA_CERT}'
+      - 'PYTHONUNBUFFERED= 1'
+      - 'HOST_IP=${HOST_IP}'
+    networks:
+      pbl_network:
+        ipv4_address: '${PAYMENT_IP}'
+    restart: unless-stopped
+
+  # Service Logger
+  logger:
+    build: ./flask_app
+    hostname: logger
+    container_name: logger
+    ports:
+      - '${LOGGER_PORT}:${GUNICORN_PORT}'
+    volumes:
+      - './flask_app/logger:/app'
+      - './cert_rabbitmq:/cert_rabbitmq'
+    expose:
+      - '${GUNICORN_PORT}'
+    environment:
+      - 'SERVICE_NAME=logger'
+      - 'SERVICE_ID=logger1'
+      - 'CONSUL_HOST=${CONSUL_HOST}'
+      - 'HAPROXY_PORT=${HAPROXY_PORT}'
+      - 'HAPROXY_IP=${HAPROXY_IP}'
+      - 'GUNICORN_PORT=${GUNICORN_PORT}'
+      - 'RABBITMQ_IP=${RABBITMQ_IP}'
+      - 'RABBITMQ_PORT=${RABBITMQ_PORT}'
+      - 'RABBITMQ_USER=${RABBITMQ_USER}'
+      - 'RABBITMQ_PASS=${RABBITMQ_PASS}'
+      - 'RABBITMQ_CLIENT_CERT=${RABBITMQ_CLIENT_CERT}'
+      - 'RABBITMQ_CLIENT_KEY=${RABBITMQ_CLIENT_KEY}'
+      - 'RABBITMQ_CA_CERT=${RABBITMQ_CA_CERT}'
+      - 'SQLALCHEMY_DATABASE_URI=${SQLALCHEMY_LOGGER_DATABASE_URI}'
+      - 'HOST_IP=${HOST_IP}'
+      - 'PYTHONUNBUFFERED= 1'
+    networks:
+      pbl_network:
+        ipv4_address: '${LOGGER_IP}'
+    restart: unless-stopped
+
+  # Load Balancer
+  haproxy:
+    build: ./haproxy
+    hostname: haproxy
+    container_name: haproxy
+    ports:
+      - '${HAPROXY_PORT}:${HAPROXY_PORT}'
+      - '${HAPROXY_STATS_PORT}:${HAPROXY_STATS_PORT}'
+    expose:
+      - '${HAPROXY_PORT}'
+      - '${HAPROXY_STATS_PORT}'
+    volumes:
+      - './cert_haproxy:/cert_haproxy'
+    
+    # Network configuration
+    networks:
+      pbl_network:
+        ipv4_address: '${HAPROXY_IP}'
+    environment:
+      - 'CONSUL_HOST=${CONSUL_HOST}'
+      - 'AUTH_IP=${AUTH_IP}'
+      - 'AUTH_PORT=${GUNICORN_PORT}'
+      - 'ORDER_IP=${ORDER_IP}'
+      - 'ORDER_PORT=${GUNICORN_PORT}'
+      - 'PAYMENT_IP=${PAYMENT_IP}'
+      - 'PAYMENT_PORT=${GUNICORN_PORT}'
+      - 'MACHINE_IP=${MACHINE_IP}'
+      - 'MACHINE_PORT=${GUNICORN_PORT}'
+      - 'DELIVERY_IP=${DELIVERY_IP}'
+      - 'DELIVERY_PORT=${GUNICORN_PORT}'
+      - 'HAPROXY_PORT=${HAPROXY_PORT}'
+      - 'HAPROXY_STATS_PORT=${HAPROXY_STATS_PORT}'
+    restart: unless-stopped
+
+  consul:
+    image: 'consul:latest'
+    hostname: consul
+    container_name: consul
+    ports:
+      - '8300:8300'
+      - '8301:8301'
+      - '8301:8301/udp'
+      - '8500:8500'
+      - '8600:8600'
+      - '8600:8600/udp'
+    networks:
+      pbl_network:
+        ipv4_address: '${CONSUL_IP}'
+# Network configuration
+networks:
+  pbl_network:
+    driver: bridge
+    ipam: # IP Address Management
+      driver: default
+      config:
+        - subnet: '${NETWORK_SUBNET}'

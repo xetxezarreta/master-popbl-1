@@ -1,0 +1,24 @@
+filebeat.inputs:
+- type: log
+  paths:
+    - /data/cowrie/cowrie.json*
+  json.keys_under_root: true
+  json.add_error_key: true
+  fields:
+    document_type: cowrie
+
+output.logstash:
+  enabled: true
+  index: filebeat
+  hosts: ["107.21.72.43:5000"]
+  #protocol: "http"  
+    
+  # Authentication credentials - either API key or username/password.
+  #api_key: "id:api_key"
+  username: "elastic"
+  password: "changeme"
+
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~

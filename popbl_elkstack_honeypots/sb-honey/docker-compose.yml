@@ -1,0 +1,106 @@
+version: '3.2'
+
+services:
+  cowrie:
+    container_name: cowrie
+    restart: always
+    build:
+      context: .
+      dockerfile: ./cowrie/Dockerfile
+    ports:
+      - "2222:2222"
+      - "2223:2223"
+    volumes:
+      - cowrie-etc:/cowrie/cowrie-git/etc
+      - cowrie-var:/cowrie/cowrie-git/var/log/cowrie
+  
+  dionaea:
+    container_name: dionaea      
+    build:
+      context: dionaea/
+    ports:
+      - "20:20"
+      - "21:21"
+      - "42:42"
+      - "69:69/udp"
+      - "81:81"
+      - "135:135"
+      - "443:443"
+      - "445:445"
+      - "1433:1433"
+      - "1723:1723"
+      - "1883:1883"
+      - "3306:3306"
+      - "5060:5060"
+      - "5060:5060/udp"
+      - "5061:5061"
+      - "27017:27017"
+
+  packetbeat:
+    container_name: packetbeat1
+    build:
+      context: packetbeat/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    environment:
+      - LOGSTASH_HOST=$LOGSTASH_HOST
+    entrypoint: "packetbeat -e -strict.perms=false"
+    user: root
+    cap_add: ['NET_RAW', 'NET_ADMIN'] # Grant some elevated privileges to capture network traffic.
+    network_mode: host # Allow to capture traffic from host.
+    volumes:
+      - type: bind
+        source: ./packetbeat/config/packetbeat.yml
+        target: /usr/share/packetbeat/packetbeat.yml
+        read_only: true
+      - type: bind
+        source: ../sb-ml/ssl/ca.crt
+        target: /usr/share/packetbeat/certs/ca/ca.crt
+        
+  metricbeat:
+    container_name: metricbeat1
+    build:
+      context: metricbeat/
+      args:
+        ELK_VERSION: $ELK_VERSION   
+    environment:
+    - LOGSTASH_HOST=$LOGSTASH_HOST
+    entrypoint: "metricbeat -e -strict.perms=false" # disable strict permission checks
+    user: root
+    network_mode: host
+    volumes:
+      - type: bind
+        source: ./metricbeat/config/metricbeat.yml
+        target: /usr/share/metricbeat/metricbeat.yml
+        read_only: true
+      - type: bind
+        source: ../sb-ml/ssl/ca.crt
+        target: /usr/share/metricbeat/certs/ca/ca.crt
+  
+#  filebeat:
+#    container_name: filebeat
+#    build:
+#      context: filebeat/
+#      args:
+#        ELK_VERSION: $ELK_VERSION   
+#    entrypoint: "filebeat -e -strict.perms=false" # disable strict permission checks
+#    user: root
+#    network_mode: host
+#    volumes:
+#      - type: bind
+#        source: ./filebeat/config/filebeat.yml
+#        target: /usr/share/filebeat/filebeat.yml
+#        read_only: true
+#      - type: volume
+#        source: cowrie-var
+#        target: /data/cowrie
+#        read_only: true
+#      - type: bind
+#        source: ../sb-ml/ssl/ca.crt        
+#        target: /usr/share/filebeat/certs/ca/ca.crt
+#    depends_on:
+#      - cowrie
+
+volumes:
+  cowrie-etc:
+  cowrie-var:

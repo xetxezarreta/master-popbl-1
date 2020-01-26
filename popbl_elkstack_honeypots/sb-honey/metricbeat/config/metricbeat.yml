@@ -1,0 +1,50 @@
+metricbeat.modules:
+
+#-------------------------------- System Module --------------------------------
+- module: system
+  metricsets:
+    - cpu             # CPU usage
+    - load            # CPU load averages
+    - memory          # Memory usage
+    - network         # Network IO
+    - process         # Per process metrics
+    - process_summary # Process summary
+    - uptime          # System Uptime
+    - socket_summary  # Socket summary
+    #- core           # Per CPU core usage
+    #- diskio         # Disk IO
+    #- filesystem     # File system usage for each mountpoint
+    #- fsstat         # File system summary metrics
+    #- raid           # Raid
+    #- socket         # Sockets and connection info (linux only)
+  enabled: true
+  period: 10s
+  processes: ['.*']
+
+  # Configure the metric types that are included by these metricsets.
+  cpu.metrics:  ["percentages"]  # The other available options are normalized_percentages and ticks.
+  core.metrics: ["percentages"]  # The other available option is ticks.
+
+#================================ Processors ===================================
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+
+#-------------------------- Logstash output ------------------------------
+output.elasticsearch:
+  enabled: true
+  index: metricbeataaa
+  hosts: ["${LOGSTASH_HOST}"]
+  protocol: "https"     
+  username: "elastic"
+  password: "changeme"
+  ssl.verification_mode: none
+  ssl.certificate_authorities: ["/usr/share/metricbeat/certs/ca/ca.crt"]
+  index: "metricbeat-honeypot"
+
+setup.template.name: "metricbeathoneypot"
+setup.template.pattern: "metricbeathoneypot-*"
+
+
+

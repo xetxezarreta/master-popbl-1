@@ -1,0 +1,80 @@
+html, body {
+  background-color: #f2f2f2;
+  padding: 5px;
+  margin: 5px;
+  line-height: 1.6;
+  font-weight: 400;
+  font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: rgb(50, 50, 50);
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-weight: 300;
+}
+
+#title {
+  text-align: center;
+} 
+
+.container {
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  margin: 10px;
+  padding: 15px;
+  position: relative;
+  box-shadow: 2px 2px 2px lightgrey;  
+  min-height: 100%;
+}
+
+.mini_container {
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  margin: 10px;
+  padding: 15px;
+  position: relative;
+  box-shadow: 2px 2px 2px lightgrey;
+  overflow: hidden;
+}
+
+#filters {
+  float: left;
+  width: 25%; 
+  height: 550px;
+}
+
+.indicator {
+  width: 33%;  
+}
+
+#indicators {
+  float: left;
+  display: flex;
+  width: 70%;
+}
+
+#graphs {
+  display: flex;
+  float: left;
+  width: 70%;
+  margin-top: 0.5%;
+}
+
+#table_div {  
+  display: flex;
+  float: left;
+  width: 100%;
+  margin-top: 0.5%;
+}
+
+#table_g {
+  width: 100%;
+}
+
+#correlation-graph {
+  width: 100%;
+}
