@@ -1,5 +1,7 @@
 # Evidence of the work done
 
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+
 This folders includes all the files we made or use for the project completion.
 
 Date: 26/01/2020
